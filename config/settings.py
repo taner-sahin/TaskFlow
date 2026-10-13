@@ -56,6 +56,12 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "users.User"
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -91,7 +97,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    "default":dj_database_url.config(
+    "default": dj_database_url.config(
         env="DATABASE_URL",
         conn_max_age=600,
         conn_health_checks=True,
