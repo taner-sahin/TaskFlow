@@ -33,7 +33,7 @@ class ProjectAPITests(APITestCase):
     def test_unauthenticated_user_cannot_list_projects(self):
         response = self.client.get(self.list_url)
 
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_user_can_only_list_own_projects(self):
         self.client.force_authenticate(user=self.user)
