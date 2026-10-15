@@ -119,9 +119,13 @@ class TaskAPITests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
 
         self.task1.refresh_from_db()
+
         self.assertEqual(self.task1.status, "in_progress")
 
     def test_user_cannot_access_other_users_task(self):
@@ -153,6 +157,7 @@ class TaskAPITests(APITestCase):
         )
 
         self.task1.refresh_from_db()
+
         self.assertEqual(self.task1.project, self.project1)
 
     def test_user_can_delete_own_task(self):
@@ -168,3 +173,41 @@ class TaskAPITests(APITestCase):
         )
 
         self.assertFalse(Task.objects.filter(id=self.task1.id).exists())
+
+    def test_user_cannot_change_task_owner(self):
+        self.client.force_authenticate(user=self.user1)
+
+        url = reverse("task-detail", args=[self.task1.id])
+
+        response = self.client.patch(
+            url,
+            {
+                "owner": self.user2.id,
+                "title": "Updated Task",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.task1.refresh_from_db()
+
+        self.assertEqual(self.task1.owner, self.user1)
+        self.assertEqual(self.task1.title, "Updated Task")
+
+    def test_user_cannot_delete_other_users_task(self):
+        self.client.force_authenticate(user=self.user1)
+
+        url = reverse("task-detail", args=[self.task2.id])
+
+        response = self.client.delete(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+        self.assertTrue(Task.objects.filter(id=self.task2.id).exists())
